@@ -13,8 +13,28 @@ et on va les concaténer pour former l'url finale.
 Coté logistique, ce fichier va se contenter de faire les appels bêtement quand on lui demande.
 Pour ce qui est optimisation et controle de fréquence (pour éviter un surplus d'appels), ca sera géré dans un autre fichier.
 """
-def requestBuilder(city, country, apiKey):
-    url = "http://api.openweathermap.org/data/2.5/weather?q="
+from dotenv import load_dotenv
+import os
+
+# Charger les variables d'environnement à partir du fichier .env
+load_dotenv()
+
+def requestBuilder(city, country,):
+    # Vérifier si les variables d'environnement sont chargées correctement
+    weather_token = os.getenv("WEATHER_TOKEN")
+    if weather_token is None:
+        print("Erreur : weather_token n'est pas défini dans le fichier .env")
+        return None
+    
+    weather_url = os.getenv("WEATHER_URL")
+    if weather_url is None:
+        print("Erreur : weather_url n'est pas défini dans le fichier .env")
+        return None
+
+    url = weather_url
     url += city + "," + country
-    url += "&appid=" + dotenv_values["DISCORD_TOKEN"]
+    url += "&APPID=" + weather_token
     return url
+
+# Exemple d'utilisation
+print(requestBuilder("Paris", "fr"))
