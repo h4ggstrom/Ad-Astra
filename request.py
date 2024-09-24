@@ -16,11 +16,11 @@ Pour ce qui est optimisation et controle de fréquence (pour éviter un surplus 
 from dotenv import load_dotenv
 import os
 
-# Charger les variables d'environnement à partir du fichier .env
+# loading the .env file
 load_dotenv()
 
 def requestBuilder(city, country,):
-    # Vérifier si les variables d'environnement sont chargées correctement
+    # storing token and url in variables + checking if they are defined
     weather_token = os.getenv("WEATHER_TOKEN")
     if weather_token is None:
         print("Erreur : weather_token n'est pas défini dans le fichier .env")
@@ -31,10 +31,11 @@ def requestBuilder(city, country,):
         print("Erreur : weather_url n'est pas défini dans le fichier .env")
         return None
 
+    # building the url
     url = weather_url
     url += city + "," + country
     url += "&APPID=" + weather_token
     return url
 
-# Exemple d'utilisation
+# use example, TODO: remove this
 print(requestBuilder("Paris", "fr"))
