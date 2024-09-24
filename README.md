@@ -16,7 +16,7 @@ More specifically, it uses data collected from [OpenWeatherMap](https://openweat
 
 ## __*__Useful links__*__
 
-maybe one day i'll put something in here
+- [API DOCUMENTATION](https://openweathermap.org/current)
 
 ## __*__Authors__*__
 
