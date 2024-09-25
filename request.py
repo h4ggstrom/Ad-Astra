@@ -13,29 +13,29 @@ et on va les concaténer pour former l'url finale.
 Coté logistique, ce fichier va se contenter de faire les appels bêtement quand on lui demande.
 Pour ce qui est optimisation et controle de fréquence (pour éviter un surplus d'appels), ca sera géré dans un autre fichier.
 """
-from dotenv import load_dotenv
-import os
 
-# loading the .env file
-load_dotenv()
+import config as cfg
 
-def requestBuilder(city, country,):
-    # storing token and url in variables + checking if they are defined
-    weather_token = os.getenv("WEATHER_TOKEN")
-    if weather_token is None:
-        print("Erreur : weather_token n'est pas défini dans le fichier .env")
-        return None
-    
-    weather_url = os.getenv("WEATHER_URL")
-    if weather_url is None:
-        print("Erreur : weather_url n'est pas défini dans le fichier .env")
-        return None
+def requestBuilder(input_url: str, city: str, country: str) -> str:
+    """this function is used to build the url for the request to the OpenWeatherMap API
+
+    Args:
+        input_url (str): the base URL for the API request
+        city (str): the city for which we want the weather
+        country (str): the country of the city
+
+    Returns:
+        str: the url for the request 
+    """
 
     # building the url
-    url = weather_url
+    url = input_url
     url += city + "," + country
-    url += "&APPID=" + weather_token
+    url += "&APPID=" + cfg.WEATHER_TOKEN
     return url
 
 # use example, TODO: remove this
-print(requestBuilder("Paris", "fr"))
+print("EXEMPLE POUR LA METEO ACTUELLE A PARIS : \n")
+print(requestBuilder(cfg.CURRENT_WEATHER_URL, "Paris", "fr"))
+print("\n ############################## \n \n EXEMPLE POUR LES PREVISIONS HEURE PAR HEURE A PARIS :")
+print(requestBuilder(cfg.HOURLY_FORECAST_URL, "Paris", "fr"))
