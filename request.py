@@ -14,7 +14,11 @@ Coté logistique, ce fichier va se contenter de faire les appels bêtement quand
 Pour ce qui est optimisation et controle de fréquence (pour éviter un surplus d'appels), ca sera géré dans un autre fichier.
 """
 
-import config as cfg
+import config as cfg #for env variables
+import requests
+import os
+import json
+from datetime import datetime
 
 def requestBuilder(input_url: str, city: str, country: str) -> str:
     """this function is used to build the url for the request to the OpenWeatherMap API
@@ -27,6 +31,9 @@ def requestBuilder(input_url: str, city: str, country: str) -> str:
     Returns:
         str: the url for the request 
     """
+    #internal variables
+    
+    url: str
 
     # building the url
     url = input_url
@@ -34,8 +41,68 @@ def requestBuilder(input_url: str, city: str, country: str) -> str:
     url += "&APPID=" + cfg.WEATHER_TOKEN
     return url
 
-# use example, TODO: remove this
-print("EXEMPLE POUR LA METEO ACTUELLE A PARIS : \n")
-print(requestBuilder(cfg.CURRENT_WEATHER_URL, "Paris", "fr"))
-print("\n ############################## \n \n EXEMPLE POUR LES PREVISIONS HEURE PAR HEURE A PARIS :")
-print(requestBuilder(cfg.HOURLY_FORECAST_URL, "Paris", "fr"))
+
+def fetchWeatherData(city: str, country: str, mode: str) -> None:
+    """make an API call for current weather at specified location.
+
+    Args:
+        city (str): the city from which we want the current weather
+        country (str): country of the city
+    """
+    
+    #internal variables
+    base_url: str
+    request_url: str
+    response: requests.Response
+    weather_data: dict
+    now: datetime
+    date_str: str
+    hour_str: str
+    output_file: str
+    
+    if (mode == "current"):
+        base_url = cfg.CURRENT_WEATHER_URL
+    elif (mode == "forecast"):
+        base_url = cfg.HOURLY_FORECAST_URL
+    else:
+        raise ValueError(f"Error: wrong mode specified. Mode should be 'current' or 'forecast'.")
+        
+    
+    request_url = requestBuilder(base_url, city, country)
+    
+    # Make the API request
+    response = requests.get(request_url)
+    
+    # Check if the request was successful
+    if response.status_code == 200:
+        weather_data = response.json()
+        # Ensure the 'data' directory exists
+        os.makedirs('data', exist_ok=True)
+
+        # Get the current date and time for the file's name
+        now = datetime.now()
+        date_str = now.strftime("%Y-%m-%d")
+        hour_str = now.strftime("%H-%M-%S")
+
+        # Define the path for the output file with the new format
+        output_file = os.path.join('data', f"{date_str}_{hour_str}_{city}_{country}_Current.json")
+        print(f"Weather data saved to {output_file}")
+        
+        # Write the weather data to the file
+        with open(output_file, 'w') as file:
+            json.dump(weather_data, file, indent=4)
+        
+    else:
+        print(f"Error: Unable to fetch weather data (status code: {response.status_code})")
+
+    
+
+#TODO retirer ca quand on aura fini
+def main():
+    city = input("Entrez la ville: ")
+    country = input("Entrez le pays: ")
+    mode = input("quel mode (current ou hourly): ")
+    fetchWeatherData(city, country, mode)
+
+if __name__ == "__main__":
+    main()
