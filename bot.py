@@ -7,3 +7,23 @@ En gros, va pas y avoir grand chose Ã  faire ici. Juste le bot va se connecter Ã
 Je pense ca va partir sur un gros tuto ytb un de ces jours, et inchallah ca va bien se passer.
 
 """
+
+import discord
+import config as cfg
+
+# Define the intents
+intents = discord.Intents.default()
+intents.messages = True
+intents.members = True
+
+# creating the client
+client = discord.Client(intents=intents)
+
+@client.event
+async def on_ready():
+    print(f'Logged in as {client.user}')
+    
+try:
+    client.run(cfg.DISCORD_TOKEN)
+except discord.errors.LoginFailure:
+    print("Invalid token")
