@@ -19,6 +19,10 @@ import requests
 import os
 import json
 from datetime import datetime
+from loguru import logger
+
+# Initialize the logger
+logger.add("data/app.log", rotation="500 MB", level="DEBUG")
 
 def requestBuilder(input_url: str, city: str, country: str) -> str:
     """this function is used to build the url for the request to the OpenWeatherMap API
@@ -31,8 +35,8 @@ def requestBuilder(input_url: str, city: str, country: str) -> str:
     Returns:
         str: the url for the request 
     """
-    #internal variables
     
+    #internal variables
     url: str
 
     # building the url
@@ -67,13 +71,14 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
     else:
         raise ValueError(f"Error: wrong mode specified. Mode should be 'current' or 'forecast'.")
         
-    
-    request_url = requestBuilder(base_url, city, country)
-    
     # Make the API request
+    request_url = requestBuilder(base_url, city, country)
     response = requests.get(request_url)
     
-    # Check if the request was successful
+    """
+    If data is fetched correctly, we save it in a file with the following format: date_hour_city_country_Current.json
+    if not, we raise an error
+    """
     if response.status_code == 200:
         weather_data = response.json()
         # Ensure the 'data' directory exists
@@ -86,14 +91,14 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
 
         # Define the path for the output file with the new format
         output_file = os.path.join('data', f"{date_str}_{hour_str}_{city}_{country}_Current.json")
-        print(f"Weather data saved to {output_file}")
+        logger.info(f"Writing weather data to {output_file}")
         
         # Write the weather data to the file
         with open(output_file, 'w') as file:
             json.dump(weather_data, file, indent=4)
         
     else:
-        print(f"Error: Unable to fetch weather data (status code: {response.status_code})")
+        logger.error(f"Error fetching data: {response.status_code}")
 
     
 
