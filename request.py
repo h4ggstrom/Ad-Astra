@@ -18,7 +18,9 @@ import config as cfg #for env variables
 import requests
 import os
 import json
-from datetime import datetime
+import time
+import threading
+from datetime import datetime, timedelta
 from loguru import logger
 
 # Initialize the logger
@@ -101,13 +103,61 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
         logger.error(f"Error fetching data: {response.status_code}")
 
     
+def houseKeeper() -> None:
+    """this function files older than one hour in the data folder.
+        This function MUST be run in a separate thread to avoid blocking the main program.    
+    """
+    #internal variables
+    now: datetime
+    creation_time: datetime
+    data_folder: str
+    file_path: str
+    
+    data_folder = 'data'
+    
+    # Check if the function is running in the main thread. If it is, log an error and return
+    if not threading.current_thread().name != "MainThread":
+        logger.error("This function should be run in a separate thread to avoid blocking the main program.")
+        return
+    
+    # Loop indefinitely
+    while True:
+        now = datetime.now()
+        for filename in os.listdir(data_folder):
+            file_path = os.path.join(data_folder, filename)
+            if os.path.isfile(file_path):
+                creation_time = datetime.fromtimestamp(os.path.getctime(file_path))
+                if now - creation_time > timedelta(hours=1):
+                    os.remove(file_path)
+                    logger.info(f"Deleted old file: {file_path}")
+        time.sleep(60) 
+
 
 #TODO retirer ca quand on aura fini
 def main():
-    city = input("Entrez la ville: ")
-    country = input("Entrez le pays: ")
-    mode = input("quel mode (current ou hourly): ")
-    fetchWeatherData(city, country, mode)
+    # Internal variables
+    city: str
+    country: str
+    mode: str
+    cleaning_thread: threading.Thread
+    main_thread: threading.Thread
+
+    def main_task():
+        nonlocal city, country, mode
+        city = input("Entrez la ville: ")
+        country = input("Entrez le pays: ")
+        mode = input("quel mode (current ou hourly): ")
+        fetchWeatherData(city, country, mode)
+
+    # Cleaning thread setup
+    cleaning_thread = threading.Thread(target=houseKeeper)
+    cleaning_thread.daemon = True  # This will make the thread close when the main program ends
+    cleaning_thread.start()
+
+    # Main thread setup
+    main_thread = threading.Thread(target=main_task)
+    main_thread.start()
+    main_thread.join()  # Wait for the main thread to finish
 
 if __name__ == "__main__":
     main()
