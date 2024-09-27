@@ -21,4 +21,4 @@ More specifically, it uses data collected from [OpenWeatherMap](https://openweat
 ## __*__Authors__*__
 
 - DE ANGELIS Robin, CYU Cergy-Paris University, <robin.de-angelis@etu.cyu.fr>
-- MONTEIRO Adrian, EFREI, <insert@mail.here>
+- MONTEIRO Adrian, EFREI, <adrian.monteiro@efrei.net>
