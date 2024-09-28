@@ -71,7 +71,7 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
     elif (mode == "forecast"):
         base_url = cfg.HOURLY_FORECAST_URL
     else:
-        raise ValueError(f"Error: wrong mode specified. Mode should be 'current' or 'forecast'.")
+        logger.error("Invalid mode. Please use 'current' or 'forecast'.")
         
     # Make the API request
     request_url = requestBuilder(base_url, city, country)
@@ -148,6 +148,7 @@ def main():
         country = input("Entrez le pays: ")
         mode = input("quel mode (current ou hourly): ")
         fetchWeatherData(city, country, mode)
+        # TODO stacktrace affiché quand mauvais mode
 
     # Cleaning thread setup
     cleaning_thread = threading.Thread(target=houseKeeper)
