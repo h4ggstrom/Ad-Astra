@@ -24,9 +24,9 @@ from datetime import datetime, timedelta
 from loguru import logger
 
 # Initialize the logger
-logger.add("data/app.log", rotation="500 MB", level="DEBUG")
+logger.add("data/Ad-Astra.log", rotation="500 MB", level="DEBUG")
 
-def requestBuilder(input_url: str, city: str, country: str) -> str:
+def requestBuilder(input_url: str, city: str, country: str, cplt: str = "") -> str:
     """this function is used to build the url for the request to the OpenWeatherMap API
 
     Args:
@@ -45,6 +45,7 @@ def requestBuilder(input_url: str, city: str, country: str) -> str:
     url = input_url
     url += city + "," + country
     url += "&APPID=" + cfg.WEATHER_TOKEN
+    url += cplt
     return url
 
 
@@ -59,6 +60,7 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
     #internal variables
     base_url: str
     request_url: str
+    cplt: str
     response: requests.Response
     weather_data: dict
     now: datetime
@@ -70,8 +72,10 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
         base_url = cfg.CURRENT_WEATHER_URL
     elif (mode == "forecast"):
         base_url = cfg.HOURLY_FORECAST_URL
+        cplt = "&cnt=12"
     else:
         logger.error("Invalid mode. Please use 'current' or 'forecast'.")
+        return
         
     # Make the API request
     request_url = requestBuilder(base_url, city, country)
@@ -130,10 +134,26 @@ def houseKeeper() -> None:
                 if now - creation_time > timedelta(hours=1):
                     os.remove(file_path)
                     logger.info(f"Deleted old file: {file_path}")
-        time.sleep(60) 
+        time.sleep(60)
+        
 
+def dataCollector(path: str, key: list) -> None:
+    try:
+        result = {}
+        with open(path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            for k in key:
+                result[k] = data.get(k, None)
+            print(result)
+                
+    except FileNotFoundError:
+        logger.error(f"File not found: {path}")
+        return None
+    except json.JSONDecodeError:
+        logger.error(f"Error decoding JSON file: {path}")
+        return None
 
-#TODO retirer ca quand on aura fini
+#TODO: retirer ca quand on aura fini
 def main():
     # Internal variables
     city: str
@@ -146,9 +166,11 @@ def main():
         nonlocal city, country, mode
         city = input("Entrez la ville: ")
         country = input("Entrez le pays: ")
-        mode = input("quel mode (current ou hourly): ")
+        mode = input("quel mode (current ou forecast): ")
         fetchWeatherData(city, country, mode)
-        # TODO stacktrace affiché quand mauvais mode
+        
+        dataCollector("data\\2024-09-30_09-34-13_Paris_fr_Current.json", ["coord", "weather", "base", "main", "visibility", "wind", "clouds", "dt", "sys", "timezone", "id", "name", "cod"])
+        # TODO: stacktrace affiché quand mauvais mode
 
     # Cleaning thread setup
     cleaning_thread = threading.Thread(target=houseKeeper)
