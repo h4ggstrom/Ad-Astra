@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 from loguru import logger
 
 # Initialize the logger
-logger.add("data/Ad-Astra.log", rotation="500 MB", level="DEBUG")
+logger.add("utils/Ad-Astra.log", rotation="500 MB", level="DEBUG")
 
 def requestBuilder(input_url: str, city: str, country: str, cplt: str = "") -> str:
     """this function is used to build the url for the request to the OpenWeatherMap API
@@ -137,21 +137,65 @@ def houseKeeper() -> None:
         time.sleep(60)
         
 
-def dataCollector(path: str, key: list) -> None:
+def forecastFetch(json: str) -> list:
+    """this function is used to extract the relevant informations from the json file containing the forecast data
+
+    Args:
+        json (str): the json file path
+
+    Returns:
+        list: the list containing the relevant informations
+    """
+    
+    #internal variables
+    data: dict
+    dt: int
+    humidity: int
+    temp: float
+    feels_like: float
+    weather: str
+    cloudiness: int
+    wind_speed: float
+    pop: float
+    weather_info: dict
+    info_list: list
+    
     try:
-        result = {}
-        with open(path, 'r', encoding='utf-8') as file:
+        with open(json, 'r') as file:
             data = json.load(file)
-            for k in key:
-                result[k] = data.get(k, None)
-            print(result)
-                
     except FileNotFoundError:
-        logger.error(f"File not found: {path}")
-        return None
+        logger.error(f"File not found: {json}")
+        return []
     except json.JSONDecodeError:
-        logger.error(f"Error decoding JSON file: {path}")
-        return None
+        logger.error(f"Error decoding JSON from file: {json}")
+        return []
+        
+    info_list = []
+    
+    for i in data['list']:
+        dt = i['dt']
+        humidity = i['main']['humidity']
+        temp = i['main']['temp']
+        feels_like = i['main']['feels_like']
+        weather = i['weather'][0]['description']
+        cloudiness = i['clouds']['all']
+        wind_speed = i['wind']['speed']
+        pop = i['pop']
+
+        weather_info = {
+            'dt': dt,
+            'humidity': humidity,
+            'temp': temp,
+            'feels_like': feels_like,
+            'weather': weather,
+            'cloudiness': cloudiness,
+            'wind_speed': wind_speed,
+            'pop': pop
+        }
+        
+        info_list.append(weather_info)
+        
+    return info_list
 
 #TODO: retirer ca quand on aura fini
 def main():
@@ -169,7 +213,7 @@ def main():
         mode = input("quel mode (current ou forecast): ")
         fetchWeatherData(city, country, mode)
         
-        dataCollector("data\\2024-09-30_09-34-13_Paris_fr_Current.json", ["coord", "weather", "base", "main", "visibility", "wind", "clouds", "dt", "sys", "timezone", "id", "name", "cod"])
+        # dataCollector("data\\2024-09-30_09-34-13_Paris_fr_Current.json", ["coord", "weather", "base", "main", "visibility", "wind", "clouds", "dt", "sys", "timezone", "id", "name", "cod"])
         # TODO: stacktrace affiché quand mauvais mode
 
     # Cleaning thread setup
