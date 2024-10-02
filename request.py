@@ -1,8 +1,6 @@
 """
 LE LIEN VERS LA DOC : https://openweathermap.org/current
 
-@TODO: faire en sorte que l'utilisation du dotenv soit plus propre (et fonctionnel)
-
 
 Bon, pour l'instant le fichier va etre en vrac pdt un moment, le temps que je trouve comment je vais organiser tout ca.
 En gros, le principe est que ce fichier va gérer les requests vers l'API OpenWeatherMap.
@@ -96,7 +94,7 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
         hour_str = now.strftime("%H-%M-%S")
 
         # Define the path for the output file with the new format
-        output_file = os.path.join('data', f"{date_str}_{hour_str}_{city}_{country}_Current.json")
+        output_file = os.path.join('data', f"{date_str}_{hour_str}_{city}_{country}_{mode}.json")
         logger.info(f"Writing weather data to {output_file}")
         
         # Write the weather data to the file
@@ -213,8 +211,6 @@ def main():
         mode = input("quel mode (current ou forecast): ")
         fetchWeatherData(city, country, mode)
         
-        # dataCollector("data\\2024-09-30_09-34-13_Paris_fr_Current.json", ["coord", "weather", "base", "main", "visibility", "wind", "clouds", "dt", "sys", "timezone", "id", "name", "cod"])
-        # TODO: stacktrace affiché quand mauvais mode
 
     # Cleaning thread setup
     cleaning_thread = threading.Thread(target=houseKeeper)
