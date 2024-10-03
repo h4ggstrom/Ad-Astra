@@ -95,7 +95,7 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
 
         # Define the path for the output file with the new format
         output_file = os.path.join('data', f"{date_str}_{hour_str}_{city}_{country}_{mode}.json")
-        logger.info(f"Writing weather data to {output_file}")
+        logger.info(f"{mode} for {city} request data saved in {output_file}")
         
         # Write the weather data to the file
         with open(output_file, 'w') as file:
@@ -195,6 +195,39 @@ def forecastFetch(json: str) -> list:
         
     return info_list
 
+
+#TODO: trier les infos qu'on récupère, plutot que return tout le JSON
+def geoLoc(city: str, country: str) -> dict:
+    """this function is used to get the geolocation of a city
+
+    Args:
+        city (str): the city for which we want the geolocation
+        country (str): the country of the city
+
+    Returns:
+        dict: the dictionary containing the geolocation
+    """
+    
+    #internal variables
+    base_url: str
+    request_url: str
+    response: requests.Response
+    geo_data: dict
+    
+    base_url = cfg.GEOLOC_URL
+    request_url = requestBuilder(base_url, city, country)
+    response = requests.get(request_url)
+    
+    if response.status_code == 200:
+        geo_data = response.json()
+        logger.debug(f"geolocation data fetched")
+        return geo_data
+    else:
+        logger.error(f"Error fetching data: {response.status_code}")
+        return {}
+
+
+
 #TODO: retirer ca quand on aura fini
 def main():
     # Internal variables
@@ -212,10 +245,12 @@ def main():
         fetchWeatherData(city, country, mode)
         
 
-    # Cleaning thread setup
+    # old data cleaner setup
+    """
     cleaning_thread = threading.Thread(target=houseKeeper)
     cleaning_thread.daemon = True  # This will make the thread close when the main program ends
     cleaning_thread.start()
+    """
 
     # Main thread setup
     main_thread = threading.Thread(target=main_task)
