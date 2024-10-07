@@ -41,7 +41,6 @@ def addnewLoc(nom: str, ville: str, pays: str, latitude: float, longitude: float
     }
     
     locFile = './utils/locations.json'
-    print(locFile)
     if os.path.exists(locFile):
         logger.info(f"opening {locFile}")
         with open(locFile, 'r', encoding='utf-8') as f:
@@ -98,7 +97,7 @@ def getFormattedLocations() -> list:
     locFile = './utils/locations.json'
     if not os.path.exists(locFile):
         logger.error(f"{locFile} does not exist.")
-        return []
+        return None
     
     with open(locFile, 'r', encoding='utf-8') as f:
         locations = json.load(f)

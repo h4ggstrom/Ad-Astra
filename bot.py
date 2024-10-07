@@ -44,12 +44,32 @@ async def ping(interaction: discord.Interaction):
 # TODO: implement error handling for the add_location command
 @tree.command(name="add_location", description="add a location to the list", guild=guild_id)
 async def add_location(interaction: discord.Interaction, nom: str, ville: str, pays: str, latitude: float, longitude: float):
+    """slash command to add a location to the list
+
+    Args:
+        interaction (discord.Interaction): the interaction object
+        nom (str): name of the location
+        ville (str): closest city to the location
+        pays (str): country of the location
+        latitude (float): latitude of the location
+        longitude (float): longitude of the location
+    """
+    
     cm.addnewLoc(nom, ville, pays, latitude, longitude)
     await interaction.response.send_message("location added :thumbsup:")
 
 
 @tree.command(name="delete_location", description="delete a location from the list", guild=guild_id)
 async def delete_location(interaction: discord.Interaction, nom: str):
+    """slash command to delete a location from the list
+
+    Args:
+        interaction (discord.Interaction): the interaction object
+        nom (str): the name of the location to delete
+    """
+    #internal variable
+    code: int
+    
     code = cm.removeLocation(nom)
     if code == 0:
         await interaction.response.send_message("location deleted :thumbsup:")
@@ -63,8 +83,16 @@ async def delete_location(interaction: discord.Interaction, nom: str):
 
 # TODO: add a command to list all the locations
 @tree.command(name="list_locations", description="list all the locations", guild=guild_id)
-async def list_locations(interaction: discord.Interaction,):
-    string: str = ""
+async def list_locations(interaction: discord.Interaction):
+    """slash command to list all the locations
+
+    Args:
+        interaction (discord.Interaction): discord interaction object
+    """
+    #internal variables
+    string: str
+    
+    string = ""
     for i in cm.getFormattedLocations():
         string += f"{i}\n"
     await interaction.response.send_message(f"```{string}```")
@@ -72,12 +100,11 @@ async def list_locations(interaction: discord.Interaction,):
 # TODO: upgrade listing to a paginated list
 @tree.command(name="get_location", description="get the details of a location", guild=guild_id)
 async def get_location(interaction: discord.Interaction, nom: str):
-    string: str = ""
     loc = cm.getLocation(nom)
-    if loc is None:
+    if loc == None:
         await interaction.response.send_message("location not found :thumbsdown:")
     else:
-        await interaction.response.send_message(f"```{loc}```")
+        await interaction.response.send_message(f"```diff\n{loc}\n```")
 
 # TODO: add a command to edit an existing location
 @tree.command(name="edit_location", description="edit an existing location", guild=guild_id)
