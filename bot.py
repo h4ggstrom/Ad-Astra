@@ -41,24 +41,43 @@ async def ping(interaction: discord.Interaction):
     await interaction.response.send_message("https://tenor.com/view/bing-gif-25601964")
 
 
-# TODO: add a command to add a location to the list
+# TODO: implement error handling for the add_location command
 @tree.command(name="add_location", description="add a location to the list", guild=guild_id)
 async def add_location(interaction: discord.Interaction, nom: str, ville: str, pays: str, latitude: float, longitude: float):
     cm.addnewLoc(nom, ville, pays, latitude, longitude)
     await interaction.response.send_message("location added :thumbsup:")
 
 
-# TODO: add a command to delete a location from the list
 @tree.command(name="delete_location", description="delete a location from the list", guild=guild_id)
-async def delete_location(interaction: discord.Interaction):
-    await interaction.response.send_message("https://tenor.com/view/you-have-been-removed-from-the-list-gif-20918111")
+async def delete_location(interaction: discord.Interaction, nom: str):
+    code = cm.removeLocation(nom)
+    if code == 0:
+        await interaction.response.send_message("location deleted :thumbsup:")
+    elif code == 1:
+        await interaction.response.send_message("location not found :thumbsdown:")
+    elif code == 2:
+        await interaction.response.send_message("error location file not found :sob:")
+    else:
+        await interaction.response.send_message(f"error code: {code}")
 
 
 # TODO: add a command to list all the locations
 @tree.command(name="list_locations", description="list all the locations", guild=guild_id)
-async def list_locations(interaction: discord.Interaction):
-    await interaction.response.send_message("https://tenor.com/view/you-have-been-removed-from-the-list-gif-20918111")
-    
+async def list_locations(interaction: discord.Interaction,):
+    string: str = ""
+    for i in cm.getFormattedLocations():
+        string += f"{i}\n"
+    await interaction.response.send_message(f"```{string}```")
+
+# TODO: upgrade listing to a paginated list
+@tree.command(name="get_location", description="get the details of a location", guild=guild_id)
+async def get_location(interaction: discord.Interaction, nom: str):
+    string: str = ""
+    loc = cm.getLocation(nom)
+    if loc is None:
+        await interaction.response.send_message("location not found :thumbsdown:")
+    else:
+        await interaction.response.send_message(f"```{loc}```")
 
 # TODO: add a command to edit an existing location
 @tree.command(name="edit_location", description="edit an existing location", guild=guild_id)
