@@ -10,6 +10,7 @@ Je pense ca va partir sur un gros tuto ytb un de ces jours, et inchallah ca va b
 import discord
 import config as cfg
 from discord import app_commands
+import commandsManager as cm
 
 
 # declaring variables
@@ -42,8 +43,9 @@ async def ping(interaction: discord.Interaction):
 
 # TODO: add a command to add a location to the list
 @tree.command(name="add_location", description="add a location to the list", guild=guild_id)
-async def add_location(interaction: discord.Interaction):
-    await interaction.response.send_message("https://tenor.com/view/you-have-been-added-to-the-list-gif-20918110")
+async def add_location(interaction: discord.Interaction, nom: str, ville: str, pays: str, latitude: float, longitude: float):
+    cm.addnewLoc(nom, ville, pays, latitude, longitude)
+    await interaction.response.send_message("location added :thumbsup:")
 
 
 # TODO: add a command to delete a location from the list
