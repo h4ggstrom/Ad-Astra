@@ -22,6 +22,3 @@ More specifically, it uses data collected from [OpenWeatherMap](https://openweat
 
 - DE ANGELIS Robin, CYU Cergy-Paris University, <robin.de-angelis@etu.cyu.fr>
 - MONTEIRO Adrian, EFREI, <adrian.monteiro@efrei.net>
-
-
-zioum 2e exemple
