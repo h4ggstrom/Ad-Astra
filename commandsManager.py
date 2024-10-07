@@ -57,7 +57,83 @@ def addnewLoc(nom: str, ville: str, pays: str, latitude: float, longitude: float
     
     with open(locFile, 'w', encoding='utf-8') as f:
         json.dump(locations, f, ensure_ascii=False, indent=4)
+
+def removeLocation(nom: str) -> int:
+    """Remove a location from the list in the file.
+
+    Args:
+        nom (str): name of the location to remove
         
+    Returns:
+        int: 2 if the file doesn't exist, 1 if the location is not found, 0 if the location is successfully removed
+    """
+    
+    locFile = './utils/locations.json'
+    if not os.path.exists(locFile):
+        logger.error(f"{locFile} does not exist.")
+        return 2
+    
+    with open(locFile, 'r', encoding='utf-8') as f:
+        locations = json.load(f)
+    
+    if nom in locations:
+        del locations[nom]
+        logger.info(f"Removed location: {nom}")
+    else:
+        logger.warning(f"Location {nom} not found.")
+        return 1
+    
+    with open(locFile, 'w', encoding='utf-8') as f:
+        json.dump(locations, f, ensure_ascii=False, indent=4)
+    
+    return 0
+
+def getFormattedLocations() -> list:
+    """Get formatted locations from the locations file.
+
+    Returns:
+        list: A list of formatted location strings in the format "{nom} ==> {latitude}, {longitude}"
+    """
+    
+    locFile = './utils/locations.json'
+    if not os.path.exists(locFile):
+        logger.error(f"{locFile} does not exist.")
+        return []
+    
+    with open(locFile, 'r', encoding='utf-8') as f:
+        locations = json.load(f)
+    
+    formatted_locations = []
+    for nom, locs in locations.items():
+        for loc in locs:
+            formatted_locations.append(f"{nom} ==> {loc['latitude']}; {loc['longitude']}")
+    
+    return formatted_locations
+        
+def getLocation(nom: str) -> dict:
+    """Get the location details of a location.
+
+    Args:
+        nom (str): name of the location to get
+
+    Returns:
+        dict: A dictionary containing the location details
+    """
+    
+    locFile = './utils/locations.json'
+    if not os.path.exists(locFile):
+        logger.error(f"{locFile} does not exist.")
+        return None
+    
+    with open(locFile, 'r', encoding='utf-8') as f:
+        locations = json.load(f)
+    
+    if nom in locations:
+        return locations[nom]
+    else:
+        logger.warning(f"Location {nom} not found.")
+        return None
+
 def main():
     # Test the addnewLoc function
     addnewLoc("Eiffel Tower", "Paris", "France", 48.8584, 2.2945)
