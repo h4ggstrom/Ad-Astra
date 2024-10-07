@@ -14,6 +14,7 @@ TODO: setThreshold
 
 import os
 import json
+from loguru import logger
 
 
 def addnewLoc(nom: str, ville: str, pays: str, latitude: float, longitude: float) -> None:
@@ -30,26 +31,38 @@ def addnewLoc(nom: str, ville: str, pays: str, latitude: float, longitude: float
     #internal variables
     newLoc: dict
     locFile: str
-    locations: list
-    
+    locations: dict
     
     newLoc = {
-        "nom": nom,
         "ville": ville,
         "pays": pays,
         "latitude": latitude,
         "longitude": longitude
     }
     
-    locFile = os.path.join(os.path.dirname(__file__), 'locations.json')
-    
+    locFile = './utils/locations.json'
+    print(locFile)
     if os.path.exists(locFile):
+        logger.info(f"opening {locFile}")
         with open(locFile, 'r', encoding='utf-8') as f:
             locations = json.load(f)
     else:
-        locations = []
+        logger.info(f"creating {locFile}")
+        locations = {}
     
-    locations.append(newLoc)
+    if nom not in locations:
+        locations[nom] = []
+    
+    locations[nom].append(newLoc)
     
     with open(locFile, 'w', encoding='utf-8') as f:
         json.dump(locations, f, ensure_ascii=False, indent=4)
+        
+def main():
+    # Test the addnewLoc function
+    addnewLoc("Eiffel Tower", "Paris", "France", 48.8584, 2.2945)
+    addnewLoc("Statue of Liberty", "New York", "USA", 40.6892, -74.0445)
+    addnewLoc("Colosseum", "Rome", "Italy", 41.8902, 12.4922)
+
+if __name__ == "__main__":
+    main()
