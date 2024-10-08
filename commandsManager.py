@@ -128,7 +128,7 @@ def getLocation(nom: str) -> dict:
         locations = json.load(f)
     
     if nom in locations:
-        return locations[nom]
+        return json.dumps(locations[nom],indent=4)
     else:
         logger.warning(f"Location {nom} not found.")
         return None

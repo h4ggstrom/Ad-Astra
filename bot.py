@@ -100,11 +100,20 @@ async def list_locations(interaction: discord.Interaction):
 # TODO: upgrade listing to a paginated list
 @tree.command(name="get_location", description="get the details of a location", guild=guild_id)
 async def get_location(interaction: discord.Interaction, nom: str):
+    """display the details of a location
+
+    Args:
+        interaction (discord.Interaction): discord interaction object
+        nom (str): name of the location
+    """
+    # internal variables
+    loc: dict
+    
     loc = cm.getLocation(nom)
     if loc == None:
         await interaction.response.send_message("location not found :thumbsdown:")
     else:
-        await interaction.response.send_message(f"```diff\n{loc}\n```")
+        await interaction.response.send_message(f"```py\n{loc}\n```")
 
 # TODO: add a command to edit an existing location
 @tree.command(name="edit_location", description="edit an existing location", guild=guild_id)
