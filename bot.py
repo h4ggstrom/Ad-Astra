@@ -11,6 +11,7 @@ import discord
 import config as cfg
 from discord import app_commands
 import commandsManager as cm
+from loguru import logger
 
 
 # declaring variables
@@ -37,40 +38,47 @@ async def on_ready():
 
 
 @tree.command(name="zioum", description="random bullshit go", guild=guild_id)
-async def ping(interaction: discord.Interaction):
+async def ping(interaction: discord.Interaction) -> None:
+    """test command to check if the bot is working. Simply sends a GIF in a discord channel.
+
+    Args:
+        interaction (discord.Interaction): discord interaction object
+    """
     await interaction.response.send_message("https://tenor.com/view/bing-gif-25601964")
 
 
 # TODO: implement error handling for the add_location command
 @tree.command(name="add_location", description="add a location to the list", guild=guild_id)
-async def add_location(interaction: discord.Interaction, nom: str, ville: str, pays: str, latitude: float, longitude: float):
+async def add_location(interaction: discord.Interaction, name: str, city: str, country: str, latitude: float, longitude: float) -> None:
     """slash command to add a location to the list
 
     Args:
         interaction (discord.Interaction): the interaction object
-        nom (str): name of the location
-        ville (str): closest city to the location
-        pays (str): country of the location
+        name (str): name of the location
+        city (str): closest city to the location
+        country (str): country of the location
         latitude (float): latitude of the location
         longitude (float): longitude of the location
     """
     
-    cm.addnewLoc(nom, ville, pays, latitude, longitude)
+    cm.addnewLoc(name, city, country, latitude, longitude)
     await interaction.response.send_message("location added :thumbsup:")
 
 
 @tree.command(name="delete_location", description="delete a location from the list", guild=guild_id)
-async def delete_location(interaction: discord.Interaction, nom: str):
+async def delete_location(interaction: discord.Interaction, name: str) -> None:
     """slash command to delete a location from the list
 
     Args:
         interaction (discord.Interaction): the interaction object
-        nom (str): the name of the location to delete
+        name (str): the name of the location to delete
     """
     #internal variable
     code: int
     
-    code = cm.removeLocation(nom)
+    code = cm.removeLocation(name)
+    
+    # error handling
     if code == 0:
         await interaction.response.send_message("location deleted :thumbsup:")
     elif code == 1:
@@ -83,7 +91,7 @@ async def delete_location(interaction: discord.Interaction, nom: str):
 
 # TODO: add a command to list all the locations
 @tree.command(name="list_locations", description="list all the locations", guild=guild_id)
-async def list_locations(interaction: discord.Interaction):
+async def list_locations(interaction: discord.Interaction) -> None:
     """slash command to list all the locations
 
     Args:
@@ -97,32 +105,35 @@ async def list_locations(interaction: discord.Interaction):
         string += f"{i}\n"
     await interaction.response.send_message(f"```{string}```")
 
-# TODO: upgrade listing to a paginated list
 @tree.command(name="get_location", description="get the details of a location", guild=guild_id)
-async def get_location(interaction: discord.Interaction, nom: str):
+async def get_location(interaction: discord.Interaction, name: str) -> None:
     """display the details of a location
 
     Args:
         interaction (discord.Interaction): discord interaction object
-        nom (str): name of the location
+        name (str): name of the location
     """
     # internal variables
     loc: dict
+    loc_str: str
     
-    loc = cm.getLocation(nom)
+    loc = cm.getLocation(name)
     if loc == None:
         await interaction.response.send_message("location not found :thumbsdown:")
     else:
-        await interaction.response.send_message(f"```py\n{loc}\n```")
+        loc_str = ""
+        for k, v in loc.items():
+            loc_str += f"{k}: {v}\n"
+        await interaction.response.send_message(f"```json\n{loc_str}\n```")
 
 # TODO: add a command to edit an existing location
 @tree.command(name="edit_location", description="edit an existing location", guild=guild_id)
-async def edit_location(interaction: discord.Interaction):
+async def edit_location(interaction: discord.Interaction) -> None:
     await interaction.response.send_message("https://tenor.com/view/you-have-been-removed-from-the-list-gif-20918111")
 
 
 @tree.command(name="get_current_weather", description="send a report of the current weather at specified location", guild=guild_id)
-async def current_weather(interaction: discord.Interaction):
+async def current_weather(interaction: discord.Interaction) -> None:
     await interaction.response.send_message("https://tenor.com/view/you-have-been-removed-from-the-list-gif-20918111")
 
 
@@ -133,7 +144,7 @@ def run():
     try:
         client.run(cfg.DISCORD_TOKEN)   
     except discord.errors.LoginFailure:
-        print("Invalid token")
+        logger.error("Invalid token.")
         
 if __name__ == "__main__":
     run() 
