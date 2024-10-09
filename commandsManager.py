@@ -12,7 +12,7 @@ TODO: setThreshold
 
 import os
 import json
-from loguru import logger
+import aaLogger as aaL
 
 
 def addnewLoc(name: str, city: str, country: str, latitude: float, longitude: float) -> None:
@@ -40,11 +40,11 @@ def addnewLoc(name: str, city: str, country: str, latitude: float, longitude: fl
     locFile = './utils/locations.json'
     
     if os.path.exists(locFile):
-        logger.info(f"opening {locFile}")
+        aaL.logger.info(f"opening {locFile}")
         with open(locFile, 'r', encoding='utf-8') as f:
             locations = json.load(f)
     else:
-        logger.info(f"creating {locFile}")
+        aaL.logger.info(f"creating {locFile}")
         locations = {}
     
     if name not in locations:
@@ -70,7 +70,7 @@ def removeLocation(name: str) -> int:
     
     locFile = './utils/locations.json'
     if not os.path.exists(locFile):
-        logger.error(f"{locFile} does not exist.")
+        aaL.logger.error(f"{locFile} does not exist.")
         return 2
     
     with open(locFile, 'r', encoding='utf-8') as f:
@@ -78,9 +78,9 @@ def removeLocation(name: str) -> int:
     
     if name in locations:
         del locations[name]
-        logger.info(f"Removed location: {name}")
+        aaL.logger.info(f"Removed location: {name}")
     else:
-        logger.warning(f"Location {name} not found.")
+        aaL.logger.warning(f"Location {name} not found.")
         return 1
     
     with open(locFile, 'w', encoding='utf-8') as f:
@@ -102,7 +102,7 @@ def getFormattedLocations() -> list:
     
     locFile = './utils/locations.json'
     if not os.path.exists(locFile):
-        logger.error(f"{locFile} does not exist.")
+        aaL.logger.error(f"{locFile} does not exist.")
         return None
     
     with open(locFile, 'r', encoding='utf-8') as f:
@@ -130,7 +130,7 @@ def getLocation(name: str) -> dict:
     
     locFile = './utils/locations.json'
     if not os.path.exists(locFile):
-        logger.error(f"{locFile} does not exist.")
+        aaL.logger.error(f"{locFile} does not exist.")
         return None
     
     with open(locFile, 'r', encoding='utf-8') as f:
@@ -139,7 +139,7 @@ def getLocation(name: str) -> dict:
     if name in locations:
         return locations[name][0]
     else:
-        logger.warning(f"Location {name} not found.")
+        aaL.logger.warning(f"Location {name} not found.")
         return None
 
 def main():

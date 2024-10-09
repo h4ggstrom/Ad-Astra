@@ -11,7 +11,7 @@ import discord
 import config as cfg
 from discord import app_commands
 import commandsManager as cm
-from loguru import logger
+import aaLogger as aaL
 
 
 # declaring variables
@@ -144,7 +144,7 @@ def run():
     try:
         client.run(cfg.DISCORD_TOKEN)   
     except discord.errors.LoginFailure:
-        logger.error("Invalid token.")
+        aaL.logger.error("Invalid token.")
         
 if __name__ == "__main__":
     run() 

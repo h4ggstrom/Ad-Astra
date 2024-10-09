@@ -19,10 +19,10 @@ import json
 import time
 import threading
 from datetime import datetime, timedelta
-from loguru import logger
+import aaLogger as aaL
 
-# Initialize the logger
-logger.add("utils/Ad-Astra.log", rotation="500 MB", level="DEBUG")
+# Initialize the aaL.logger
+aaL.logger.add("utils/Ad-Astra.log", rotation="500 MB", level="DEBUG")
 
 def requestBuilder(input_url: str, city: str, country: str, cplt: str = "") -> str:
     """this function is used to build the url for the request to the OpenWeatherMap API
@@ -72,7 +72,7 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
         base_url = cfg.HOURLY_FORECAST_URL
         cplt = "&cnt=12"
     else:
-        logger.error("Invalid mode. Please use 'current' or 'forecast'.")
+        aaL.logger.error("Invalid mode. Please use 'current' or 'forecast'.")
         return
         
     # Make the API request
@@ -95,14 +95,14 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
 
         # Define the path for the output file with the new format
         output_file = os.path.join('data', f"{date_str}_{hour_str}_{city}_{country}_{mode}.json")
-        logger.info(f"{mode} for {city} request data saved in {output_file}")
+        aaL.logger.info(f"{mode} for {city} request data saved in {output_file}")
         
         # Write the weather data to the file
         with open(output_file, 'w') as file:
             json.dump(weather_data, file, indent=4)
         
     else:
-        logger.error(f"Error fetching data: {response.status_code}")
+        aaL.logger.error(f"Error fetching data: {response.status_code}")
 
     
 def houseKeeper() -> None:
@@ -119,7 +119,7 @@ def houseKeeper() -> None:
     
     # Check if the function is running in the main thread. If it is, log an error and return
     if not threading.current_thread().name != "MainThread":
-        logger.error("This function should be run in a separate thread to avoid blocking the main program.")
+        aaL.logger.error("This function should be run in a separate thread to avoid blocking the main program.")
         return
     
     # Loop indefinitely
@@ -131,7 +131,7 @@ def houseKeeper() -> None:
                 creation_time = datetime.fromtimestamp(os.path.getctime(file_path))
                 if now - creation_time > timedelta(hours=1):
                     os.remove(file_path)
-                    logger.info(f"Deleted old file: {file_path}")
+                    aaL.logger.info(f"Deleted old file: {file_path}")
         time.sleep(60)
         
 
@@ -162,10 +162,10 @@ def forecastFetch(json: str) -> list:
         with open(json, 'r') as file:
             data = json.load(file)
     except FileNotFoundError:
-        logger.error(f"File not found: {json}")
+        aaL.logger.error(f"File not found: {json}")
         return []
     except json.JSONDecodeError:
-        logger.error(f"Error decoding JSON from file: {json}")
+        aaL.logger.error(f"Error decoding JSON from file: {json}")
         return []
         
     info_list = []
@@ -220,10 +220,10 @@ def geoLoc(city: str, country: str) -> dict:
     
     if response.status_code == 200:
         geo_data = response.json()
-        logger.debug(f"geolocation data fetched")
+        aaL.logger.debug(f"geolocation data fetched")
         return geo_data
     else:
-        logger.error(f"Error fetching data: {response.status_code}")
+        aaL.logger.error(f"Error fetching data: {response.status_code}")
         return {}
 
 
