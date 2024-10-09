@@ -47,7 +47,6 @@ async def ping(interaction: discord.Interaction) -> None:
     await interaction.response.send_message("https://tenor.com/view/bing-gif-25601964")
 
 
-# TODO: implement error handling for the add_location command
 @tree.command(name="add_location", description="add a location to the list", guild=guild_id)
 async def add_location(interaction: discord.Interaction, name: str, city: str, country: str, latitude: float, longitude: float) -> None:
     """slash command to add a location to the list
@@ -89,7 +88,6 @@ async def delete_location(interaction: discord.Interaction, name: str) -> None:
         await interaction.response.send_message(f"error code: {code}")
 
 
-# TODO: add a command to list all the locations
 @tree.command(name="list_locations", description="list all the locations", guild=guild_id)
 async def list_locations(interaction: discord.Interaction) -> None:
     """slash command to list all the locations
