@@ -226,6 +226,29 @@ def geoLoc(city: str, country: str) -> dict:
         aaL.logger.error(f"Error fetching data: {response.status_code}")
         return {}
 
+def getCoordinates(zip: int, country: str) -> dict:
+    """returns coordinates of a specific location from a zip code and a country
+
+    Args:
+        zip (int): zip code of the location
+        country (str): country of the location
+
+    Returns:
+        dict: the dictionary containing the coordinates
+    """
+    #internal variables
+    rq_url: str
+    coordinates: dict
+    
+    rq_url = cfg.GEOLOC_URL
+    rq_url += f"?zip={zip},{country}"
+    rq_url += "&APPID=" + cfg.WEATHER_TOKEN
+    
+    coordinates = (requests.get(rq_url)).json()
+    return coordinates
+    
+    
+    
 
 
 #TODO: retirer ca quand on aura fini

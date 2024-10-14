@@ -12,6 +12,7 @@ import config as cfg
 from discord import app_commands
 import commandsManager as cm
 import aaLogger as aaL
+import request as rq
 
 
 # declaring variables
@@ -124,17 +125,24 @@ async def get_location(interaction: discord.Interaction, name: str) -> None:
             loc_str += f"{k}: {v}\n"
         await interaction.response.send_message(f"```json\n{loc_str}\n```")
 
-# TODO: add a command to edit an existing location
-@tree.command(name="edit_location", description="edit an existing location", guild=guild_id)
-async def edit_location(interaction: discord.Interaction) -> None:
-    await interaction.response.send_message("https://tenor.com/view/you-have-been-removed-from-the-list-gif-20918111")
-
 
 @tree.command(name="get_current_weather", description="send a report of the current weather at specified location", guild=guild_id)
 async def current_weather(interaction: discord.Interaction) -> None:
     await interaction.response.send_message("https://tenor.com/view/you-have-been-removed-from-the-list-gif-20918111")
 
-
+"""
+FIXME
+@tree.command(name="coordinates", description="get the coordinates of a location", guild=guild_id)
+async def coordinates(interaction: discord.Interaction, zip: int, country: str) -> None:
+    coordinates = rq.getCoordinates(zip, country)
+    if coordinates == None:
+        await interaction.response.send_message("fetch failed :upside_down:")
+    coord = ""
+    for k, v in coordinates.items():
+        coord += f"{k}: {v}\n"
+    await interaction.response.send_message(f"```json\n {coord}\n```")
+    
+"""
 
 
 # tbh this try/catch section is useless considering the token doesn't expire (and works), but let's call that *code quality* :upside_down:
