@@ -130,19 +130,17 @@ async def get_location(interaction: discord.Interaction, name: str) -> None:
 async def current_weather(interaction: discord.Interaction) -> None:
     await interaction.response.send_message("https://tenor.com/view/you-have-been-removed-from-the-list-gif-20918111")
 
-"""
-FIXME
+
 @tree.command(name="coordinates", description="get the coordinates of a location", guild=guild_id)
 async def coordinates(interaction: discord.Interaction, zip: int, country: str) -> None:
     coordinates = rq.getCoordinates(zip, country)
     if coordinates == None:
         await interaction.response.send_message("fetch failed :upside_down:")
-    coord = ""
+    coord = "values \n"
     for k, v in coordinates.items():
         coord += f"{k}: {v}\n"
     await interaction.response.send_message(f"```json\n {coord}\n```")
     
-"""
 
 
 # tbh this try/catch section is useless considering the token doesn't expire (and works), but let's call that *code quality* :upside_down:

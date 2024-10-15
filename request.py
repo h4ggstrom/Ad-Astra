@@ -241,10 +241,16 @@ def getCoordinates(zip: int, country: str) -> dict:
     coordinates: dict
     
     rq_url = cfg.GEOLOC_URL
-    rq_url += f"?zip={zip},{country}"
-    rq_url += "&APPID=" + cfg.WEATHER_TOKEN
-    
+    rq_url += f"zip?zip={zip},{country}"
+    rq_url += "&appid=" + cfg.WEATHER_TOKEN
+    print(rq_url)
     coordinates = (requests.get(rq_url)).json()
+    
+    if coordinates == None:
+        aaL.logger.error("fetch failed")
+    else:
+        aaL.logger.info("coordinates fetched")
+    
     return coordinates
     
     
