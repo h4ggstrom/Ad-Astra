@@ -24,30 +24,7 @@ import aaLogger as aaL
 # Initialize the aaL.logger
 aaL.logger.add("utils/Ad-Astra.log", rotation="500 MB", level="DEBUG")
 
-def requestBuilder(input_url: str, city: str, country: str, cplt: str = "") -> str:
-    """this function is used to build the url for the request to the OpenWeatherMap API
-
-    Args:
-        input_url (str): the base URL for the API request
-        city (str): the city for which we want the weather
-        country (str): the country of the city
-
-    Returns:
-        str: the url for the request 
-    """
-    
-    #internal variables
-    url: str
-
-    # building the url
-    url = input_url
-    url += city + "," + country
-    url += "&APPID=" + cfg.WEATHER_TOKEN
-    url += cplt
-    return url
-
-
-def fetchWeatherData(city: str, country: str, mode: str) -> None:
+def fetchWeatherData(lat: float, lon: float, mode: str) -> None:
     """make an API call for current weather at specified location.
 
     Args:
@@ -58,7 +35,6 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
     #internal variables
     base_url: str
     request_url: str
-    cplt: str
     response: requests.Response
     weather_data: dict
     now: datetime
@@ -70,17 +46,17 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
         base_url = cfg.CURRENT_WEATHER_URL
     elif (mode == "forecast"):
         base_url = cfg.HOURLY_FORECAST_URL
-        cplt = "&cnt=12"
     else:
         aaL.logger.error("Invalid mode. Please use 'current' or 'forecast'.")
         return
         
     # Make the API request
-    request_url = requestBuilder(base_url, city, country)
+    request_url = base_url + f"lat={lat}&lon={lon}&appid=" + cfg.WEATHER_TOKEN + "&cnt=12"
+    print(request_url)
     response = requests.get(request_url)
     
     """
-    If data is fetched correctly, we save it in a file with the following format: date_hour_city_country_Current.json
+    If data is fetched correctly, we save it in a file with the following format: date_hour_lat_lon_Mode.json
     if not, we raise an error
     """
     if response.status_code == 200:
@@ -94,8 +70,8 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
         hour_str = now.strftime("%H-%M-%S")
 
         # Define the path for the output file with the new format
-        output_file = os.path.join('data', f"{date_str}_{hour_str}_{city}_{country}_{mode}.json")
-        aaL.logger.info(f"{mode} for {city} request data saved in {output_file}")
+        output_file = os.path.join('data', f"{date_str}_{hour_str}_{lat}_{lon}_{mode}.json")
+        aaL.logger.info(f"{mode} for {lat}; {lon} request data saved in {output_file}")
         
         # Write the weather data to the file
         with open(output_file, 'w') as file:
@@ -106,7 +82,7 @@ def fetchWeatherData(city: str, country: str, mode: str) -> None:
 
     
 def houseKeeper() -> None:
-    """this function files older than one hour in the data folder.
+    """this function deletes files older than one hour in the data folder.
         This function MUST be run in a separate thread to avoid blocking the main program.    
     """
     #internal variables
@@ -196,36 +172,6 @@ def forecastFetch(json: str) -> list:
     return info_list
 
 
-#TODO: trier les infos qu'on récupère, plutot que return tout le JSON
-def geoLoc(city: str, country: str) -> dict:
-    """this function is used to get the geolocation of a city
-
-    Args:
-        city (str): the city for which we want the geolocation
-        country (str): the country of the city
-
-    Returns:
-        dict: the dictionary containing the geolocation
-    """
-    
-    #internal variables
-    base_url: str
-    request_url: str
-    response: requests.Response
-    geo_data: dict
-    
-    base_url = cfg.GEOLOC_URL
-    request_url = requestBuilder(base_url, city, country)
-    response = requests.get(request_url)
-    
-    if response.status_code == 200:
-        geo_data = response.json()
-        aaL.logger.debug(f"geolocation data fetched")
-        return geo_data
-    else:
-        aaL.logger.error(f"Error fetching data: {response.status_code}")
-        return {}
-
 def getCoordinates(zip: int, country: str) -> dict:
     """returns coordinates of a specific location from a zip code and a country
 
@@ -253,38 +199,10 @@ def getCoordinates(zip: int, country: str) -> dict:
     
     return coordinates
     
-    
-    
-
-
-#TODO: retirer ca quand on aura fini
 def main():
-    # Internal variables
-    city: str
-    country: str
-    mode: str
-    cleaning_thread: threading.Thread
-    main_thread: threading.Thread
-
-    def main_task():
-        nonlocal city, country, mode
-        city = input("Entrez la ville: ")
-        country = input("Entrez le pays: ")
-        mode = input("quel mode (current ou forecast): ")
-        fetchWeatherData(city, country, mode)
-        
-
-    # old data cleaner setup
-    """
-    cleaning_thread = threading.Thread(target=houseKeeper)
-    cleaning_thread.daemon = True  # This will make the thread close when the main program ends
-    cleaning_thread.start()
-    """
-
-    # Main thread setup
-    main_thread = threading.Thread(target=main_task)
-    main_thread.start()
-    main_thread.join()  # Wait for the main thread to finish
-
+    coords = getCoordinates(75000, "FR")
+    wd = fetchWeatherData(coords['lat'], coords['lon'], "forecast")
+    print(wd)
+    
 if __name__ == "__main__":
     main()
