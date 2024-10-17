@@ -37,9 +37,6 @@ def fetchWeatherData(lat: float, lon: float, mode: str) -> None:
     request_url: str
     response: requests.Response
     weather_data: dict
-    now: datetime
-    date_str: str
-    hour_str: str
     output_file: str
     
     if (mode == "current"):
@@ -49,10 +46,14 @@ def fetchWeatherData(lat: float, lon: float, mode: str) -> None:
     else:
         aaL.logger.error("Invalid mode. Please use 'current' or 'forecast'.")
         return
+    
+    # Check if the data already exists (aka if there is a request that was called less than an hour ago)
+    if os.path.exists(f"data/{lat}_{lon}_{mode}.json"):
+        aaL.logger.warning(f"Data for {lat}; {lon} already exists. Skipping request.")
+        return
         
     # Make the API request
     request_url = base_url + f"lat={lat}&lon={lon}&appid=" + cfg.WEATHER_TOKEN + "&cnt=12"
-    print(request_url)
     response = requests.get(request_url)
     
     """
@@ -66,11 +67,9 @@ def fetchWeatherData(lat: float, lon: float, mode: str) -> None:
 
         # Get the current date and time for the file's name
         now = datetime.now()
-        date_str = now.strftime("%Y-%m-%d")
-        hour_str = now.strftime("%H-%M-%S")
 
         # Define the path for the output file with the new format
-        output_file = os.path.join('data', f"{date_str}_{hour_str}_{lat}_{lon}_{mode}.json")
+        output_file = os.path.join('data', f"{lat}_{lon}_{mode}.json")
         aaL.logger.info(f"{mode} for {lat}; {lon} request data saved in {output_file}")
         
         # Write the weather data to the file
