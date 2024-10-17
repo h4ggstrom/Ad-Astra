@@ -141,6 +141,27 @@ async def coordinates(interaction: discord.Interaction, zip: int, country: str) 
         coord += f"{k}: {v}\n"
     await interaction.response.send_message(f"```json\n {coord}\n```")
     
+# TODO: ca, ca dégage une fois qu'on a fini d'implémenter l'affichage   
+@tree.command(name="embed", description="Envoie un message embed", guild=guild_id)
+async def embed(interaction: discord.Interaction) -> None:
+    embed = discord.Embed(
+        title="Prévisions Météo du Jour",
+        description="Voici les prévisions météo complètes.",
+        color=discord.Color.green(),
+        url="https://example.com"
+    )
+    
+    user = await client.fetch_user(interaction.user.id)
+    embed.set_author(name=user.name, icon_url=user.avatar.url)
+    embed.add_field(name="Ville", value="Paris", inline=False)
+    embed.add_field(name="Température", value="18°C", inline=True)
+    embed.add_field(name="Humidité", value="72%", inline=True)
+    embed.set_thumbnail(url="https://openweathermap.org/img/wn/10d@2x.png")
+    embed.set_image(url="https://example.com/weather-map.png")
+    embed.set_footer(text="Dernière mise à jour : 12h00", icon_url="https://example.com/logo.png")
+    embed.timestamp = discord.utils.utcnow()
+    
+    await interaction.response.send_message(embed=embed)
 
 
 # tbh this try/catch section is useless considering the token doesn't expire (and works), but let's call that *code quality* :upside_down:
