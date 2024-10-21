@@ -110,11 +110,11 @@ def houseKeeper() -> None:
         time.sleep(60)
         
 
-def forecastFetch(json: str) -> list:
+def forecastFetch(json_file: str) -> list:
     """this function is used to extract the relevant informations from the json file containing the forecast data
 
     Args:
-        json (str): the json file path
+        json_file (str): the json file path
 
     Returns:
         list: the list containing the relevant informations
@@ -134,19 +134,19 @@ def forecastFetch(json: str) -> list:
     info_list: list
     
     try:
-        with open(json, 'r') as file:
+        with open(json_file, 'r') as file:
             data = json.load(file)
     except FileNotFoundError:
-        aaL.logger.error(f"File not found: {json}")
+        aaL.logger.error(f"File not found: {json_file}")
         return []
     except json.JSONDecodeError:
-        aaL.logger.error(f"Error decoding JSON from file: {json}")
+        aaL.logger.error(f"Error decoding JSON from file: {json_file}")
         return []
         
     info_list = []
     
     for i in data['list']:
-        dt = i['dt']
+        dt = datetime.fromtimestamp(i['dt']).strftime('%H')
         humidity = i['main']['humidity']
         temp = i['main']['temp']
         feels_like = i['main']['feels_like']
@@ -201,7 +201,8 @@ def getCoordinates(zip: int, country: str) -> dict:
 def main():
     coords = getCoordinates(75000, "FR")
     wd = fetchWeatherData(coords['lat'], coords['lon'], "forecast")
-    print(wd)
+    forecasted_data = forecastFetch("data/48.8534_2.3488_forecast.json")
+    print(forecasted_data)
     
 if __name__ == "__main__":
     main()

@@ -7,12 +7,15 @@ En gros, va pas y avoir grand chose à faire ici. Juste le client va se connecte
 Je pense ca va partir sur un gros tuto ytb un de ces jours, et inchallah ca va bien se passer.
 
 """
+import json
 import discord
 import config as cfg
 from discord import app_commands
 import commandsManager as cm
 import aaLogger as aaL
 import request as rq
+import os
+from datetime import datetime
 
 
 # declaring variables
@@ -47,7 +50,7 @@ async def ping(interaction: discord.Interaction) -> None:
     """
     await interaction.response.send_message("https://tenor.com/view/bing-gif-25601964")
 
-
+# TODO: utiliser le code de la fonction coordinate pour simplifier les arguments
 @tree.command(name="add_location", description="add a location to the list", guild=guild_id)
 async def add_location(interaction: discord.Interaction, name: str, city: str, country: str, latitude: float, longitude: float) -> None:
     """slash command to add a location to the list
@@ -162,7 +165,47 @@ async def embed(interaction: discord.Interaction) -> None:
     embed.timestamp = discord.utils.utcnow()
     
     await interaction.response.send_message(embed=embed)
+    
+@tree.command(name="forecast", description="display a 12h hour forecast for a specific location", guild=guild_id)
+async def forecast(interaction: discord.Interaction, name: str) -> None:
+    loc = cm.getLocation(name)
+    
+    if loc is None:
+        await interaction.response.send_message("location not found :thumbsdown:")
+    else:
+        rq.fetchWeatherData(loc['latitude'], loc['longitude'], "forecast")
+        wd = rq.forecastFetch(f"data/{loc['latitude']}_{loc['longitude']}_forecast.json")
+        if wd is None:
+            await interaction.response.send_message("fetch failed :upside_down:")
+        else:
+            embed = discord.Embed(
+                title=f"Prévisions Météo pour {name}- Heure par Heure",
+                description="Voici les prévisions météo pour les 12 prochaines heures",
+                color=discord.Color.blue()
+            )
+            
+            for hour_data in wd:
+                # Formatage de l'heure et des données
+                hour = hour_data['dt'] + ":00"
+                weather = hour_data['weather'].capitalize()
+                temperature = f"{hour_data['temp'] - 273.15:.1f}°C"  # Conversion de Kelvin en Celsius
+                feels_like = f"{hour_data['feels_like'] - 273.15:.1f}°C"
+                humidity = f"Humidité: {hour_data['humidity']}%"
+                wind = f"Vent: {hour_data['wind_speed']} m/s"
+                cloudiness = f"Nuages: {hour_data['cloudiness']}%"
+                pop = f"Probabilité de précipitations: {hour_data['pop'] * 100}%"
 
+                # Ajout de chaque champ pour chaque heure
+                embed.add_field(name=hour, value=f"{weather}\nTempérature: {temperature}\nRessenti: {feels_like}\n{humidity}\n{wind}\n{cloudiness}\n{pop}", inline=False)
+                # Get the last modified time of the JSON file
+
+                file_path = f"data/{loc['latitude']}_{loc['longitude']}_forecast.json"
+                last_modified_time = os.path.getmtime(file_path)
+                last_modified_date = datetime.fromtimestamp(last_modified_time).strftime('%Y-%m-%d %H:%M:%S')
+
+                # Add footer with the last modified date
+                embed.set_footer(text=f"Dernière mise à jour : {last_modified_date}")
+            await interaction.response.send_message(embed=embed)
 
 # tbh this try/catch section is useless considering the token doesn't expire (and works), but let's call that *code quality* :upside_down:
 def run():
