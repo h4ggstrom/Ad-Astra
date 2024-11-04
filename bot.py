@@ -16,6 +16,7 @@ import aaLogger as aaL
 import request as rq
 import os
 from datetime import datetime
+import threading
 
 
 # declaring variables
@@ -38,7 +39,7 @@ guild_id = discord.Object(id="1168264156500217966")
 @client.event
 async def on_ready():
     await tree.sync(guild=guild_id)
-    print(f'Logged in as {client.user}')
+    aaL.logger.info(f"Logged in as {client.user.name} - {client.user.id}")
 
 
 @tree.command(name="zioum", description="random bullshit go", guild=guild_id)
@@ -190,18 +191,18 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
                 weather = hour_data['weather'].capitalize()
                 temperature = f"{hour_data['temp'] - 273.15:.1f}°C"  # Conversion de Kelvin en Celsius
                 feels_like = f"{hour_data['feels_like'] - 273.15:.1f}°C"
-                humidity = f"Humidité: {hour_data['humidity']}%"
-                wind = f"Vent: {hour_data['wind_speed']} m/s"
-                cloudiness = f"Nuages: {hour_data['cloudiness']}%"
-                pop = f"Probabilité de précipitations: {hour_data['pop'] * 100}%"
+                humidity = f"Humidité: **{hour_data['humidity']}%**"
+                wind = f"Vent: **{hour_data['wind_speed']} m/s**"
+                cloudiness = f"Nuages: **{hour_data['cloudiness']}%**"
+                pop = f"précipitations: **{hour_data['pop'] * 100}%**"
 
                 # Ajout de chaque champ pour chaque heure
-                embed.add_field(name=hour, value=f"{weather}\nTempérature: {temperature}\nRessenti: {feels_like}\n{humidity}\n{wind}\n{cloudiness}\n{pop}", inline=False)
+                embed.add_field(name=hour, value=f"**{weather}**\nTempérature: **{temperature}**\nRessenti: **{feels_like}**\n{humidity}\n{wind}\n{cloudiness}\n{pop}", inline=True)
                 # Get the last modified time of the JSON file
 
                 file_path = f"data/{loc['latitude']}_{loc['longitude']}_forecast.json"
                 last_modified_time = os.path.getmtime(file_path)
-                last_modified_date = datetime.fromtimestamp(last_modified_time).strftime('%Y-%m-%d %H:%M:%S')
+                last_modified_date = datetime.fromtimestamp(last_modified_time).strftime('%d/%m/%Y %H:%M:%S')
 
                 # Add footer with the last modified date
                 embed.set_footer(text=f"Dernière mise à jour : {last_modified_date}")
@@ -210,7 +211,7 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
 # tbh this try/catch section is useless considering the token doesn't expire (and works), but let's call that *code quality* :upside_down:
 def run():
     try:
-        client.run(cfg.DISCORD_TOKEN)   
+        client.run(cfg.DISCORD_TOKEN)
     except discord.errors.LoginFailure:
         aaL.logger.error("Invalid token.")
         
