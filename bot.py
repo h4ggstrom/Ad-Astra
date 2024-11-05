@@ -182,7 +182,7 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
             embed = discord.Embed(
                 title=f"Prévisions Météo pour {name}- Heure par Heure",
                 description="Voici les prévisions météo pour les 12 prochaines heures",
-                color=discord.Color.blue()
+                color=discord.Color.purple()
             )
             
             for hour_data in wd:
@@ -191,6 +191,7 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
                 hour = hour_data['dt'] + ":00"
                 weather = hour_data['weather'].capitalize()
                 
+                # cloudiness rating
                 if hour_data['cloudiness'] < 20:
                     cloudiness = ":green_square: "
                 elif 20 <= hour_data['cloudiness'] < 50:
@@ -201,6 +202,8 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
                     badness += 3
                 cloudiness += f"Nuages: **{hour_data['cloudiness']}%**"
                 
+                
+                # temperature rating
                 if 0<(hour_data['temp'] - 273.15) and (hour_data['temp'] - 273.15)<10 :
                     temperature = ":green_square: "
                 else:
@@ -208,6 +211,8 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
                     badness += 0.2
                 temperature += f"Température: **{hour_data['temp'] - 273.15:.1f}°C**"  # Conversion de Kelvin en Celsius
                 
+                
+                # humidity rating
                 if hour_data['humidity'] < 50:
                     humidity = ":green_square: "
                 elif 50 <= hour_data['humidity'] < 70:
@@ -218,6 +223,8 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
                     badness += 1
                 humidity += f"Humidité: **{hour_data['humidity']}%**"
                 
+                
+                # wind rating
                 if hour_data['wind_speed'] < 2.78:
                     wind = ":green_square: "
                 elif 2.78 <= hour_data['wind_speed'] < 6.94:
@@ -228,13 +235,16 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
                     badness += 1
                 wind += f"Vent: **{hour_data['wind_speed']} m/s**"
                 
-                if hour_data['pop'] < 0.2:
+                
+                # pop rating
+                if hour_data['pop'] < 0.02:
                     pop = ":green_square: "
                 else:
                     pop = ":red_square: "
                     badness += 3
                 pop += f"précipitations: **{hour_data['pop'] * 100}%**"
                 
+                # badness rating
                 if badness < 2:
                     rating = "__***RATING: ***__:green_square:"
                 elif badness < 3:
