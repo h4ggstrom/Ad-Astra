@@ -187,17 +187,63 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
             
             for hour_data in wd:
                 # Formatage de l'heure et des données
+                badness = 0
                 hour = hour_data['dt'] + ":00"
                 weather = hour_data['weather'].capitalize()
-                temperature = f"{hour_data['temp'] - 273.15:.1f}°C"  # Conversion de Kelvin en Celsius
-                feels_like = f"{hour_data['feels_like'] - 273.15:.1f}°C"
-                humidity = f"Humidité: **{hour_data['humidity']}%**"
-                wind = f"Vent: **{hour_data['wind_speed']} m/s**"
-                cloudiness = f"Nuages: **{hour_data['cloudiness']}%**"
-                pop = f"précipitations: **{hour_data['pop'] * 100}%**"
+                
+                if hour_data['cloudiness'] < 20:
+                    cloudiness = ":green_square: "
+                elif 20 <= hour_data['cloudiness'] < 50:
+                    cloudiness = ":orange_square: "
+                    badness += 1
+                else:
+                    cloudiness = ":red_square: "
+                    badness += 3
+                cloudiness += f"Nuages: **{hour_data['cloudiness']}%**"
+                
+                if 0<(hour_data['temp'] - 273.15) and (hour_data['temp'] - 273.15)<10 :
+                    temperature = ":green_square: "
+                else:
+                    temperature = ":orange_square: "
+                    badness += 0.2
+                temperature += f"Température: **{hour_data['temp'] - 273.15:.1f}°C**"  # Conversion de Kelvin en Celsius
+                
+                if hour_data['humidity'] < 50:
+                    humidity = ":green_square: "
+                elif 50 <= hour_data['humidity'] < 70:
+                    humidity = ":orange_square: "
+                    badness += 0.5
+                else:
+                    humidity = ":red_square: "
+                    badness += 1
+                humidity += f"Humidité: **{hour_data['humidity']}%**"
+                
+                if hour_data['wind_speed'] < 2.78:
+                    wind = ":green_square: "
+                elif 2.78 <= hour_data['wind_speed'] < 6.94:
+                    wind = ":orange_square: "
+                    badness += 0.5
+                else:
+                    wind = ":red_square: "
+                    badness += 1
+                wind += f"Vent: **{hour_data['wind_speed']} m/s**"
+                
+                if hour_data['pop'] < 0.2:
+                    pop = ":green_square: "
+                else:
+                    pop = ":red_square: "
+                    badness += 3
+                pop += f"précipitations: **{hour_data['pop'] * 100}%**"
+                
+                if badness < 2:
+                    rating = "__***RATING: ***__:green_square:"
+                elif badness < 3:
+                    rating = "__***RATING: ***__:orange_square:"
+                else:
+                    rating = "__***RATING: ***__:red_square:"
 
                 # Ajout de chaque champ pour chaque heure
-                embed.add_field(name=hour, value=f"**{weather}**\nTempérature: **{temperature}**\nRessenti: **{feels_like}**\n{humidity}\n{wind}\n{cloudiness}\n{pop}", inline=True)
+                embed.add_field(name=hour, value=f"{rating}\n**{weather}**\n{cloudiness}\n{temperature}\n{humidity}\n{wind}\n{pop}", inline=True)
                 # Get the last modified time of the JSON file
 
                 file_path = f"data/{loc['latitude']}_{loc['longitude']}_forecast.json"
@@ -211,6 +257,14 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
 # tbh this try/catch section is useless considering the token doesn't expire (and works), but let's call that *code quality* :upside_down:
 def run():
     try:
+        # Start the houseKeeper function in a separate daemon thread
+        housekeeper_thread = threading.Thread(target=rq.houseKeeper, daemon=True)
+        housekeeper_thread.start()
+        if not housekeeper_thread.is_alive():
+            aaL.logger.error("Housekeeper deamon failed to start.")
+            return
+        aaL.logger.debug("Housekeeper deamon started.")
+        
         client.run(cfg.DISCORD_TOKEN)
     except discord.errors.LoginFailure:
         aaL.logger.error("Invalid token.")

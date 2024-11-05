@@ -125,7 +125,6 @@ def forecastFetch(json_file: str) -> list:
     dt: int
     humidity: int
     temp: float
-    feels_like: float
     weather: str
     cloudiness: int
     wind_speed: float
@@ -149,7 +148,6 @@ def forecastFetch(json_file: str) -> list:
         dt = datetime.fromtimestamp(i['dt']).strftime('%H')
         humidity = i['main']['humidity']
         temp = i['main']['temp']
-        feels_like = i['main']['feels_like']
         weather = i['weather'][0]['description']
         cloudiness = i['clouds']['all']
         wind_speed = i['wind']['speed']
@@ -159,7 +157,6 @@ def forecastFetch(json_file: str) -> list:
             'dt': dt,
             'humidity': humidity,
             'temp': temp,
-            'feels_like': feels_like,
             'weather': weather,
             'cloudiness': cloudiness,
             'wind_speed': wind_speed,
