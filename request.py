@@ -185,7 +185,6 @@ def getCoordinates(zip: int, country: str) -> dict:
     rq_url = cfg.GEOLOC_URL
     rq_url += f"zip?zip={zip},{country}"
     rq_url += "&appid=" + cfg.WEATHER_TOKEN
-    print(rq_url)
     coordinates = (requests.get(rq_url)).json()
     
     if coordinates == None:

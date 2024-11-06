@@ -7,7 +7,6 @@ En gros, va pas y avoir grand chose à faire ici. Juste le client va se connecte
 Je pense ca va partir sur un gros tuto ytb un de ces jours, et inchallah ca va bien se passer.
 
 """
-import json
 import discord
 import config as cfg
 from discord import app_commands
@@ -176,7 +175,8 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
     else:
         rq.fetchWeatherData(loc['latitude'], loc['longitude'], "forecast")
         wd = rq.forecastFetch(f"data/{loc['latitude']}_{loc['longitude']}_forecast.json")
-        if wd is None:
+        if len(wd) == 0:
+            print("zbilizbouet")
             await interaction.response.send_message("fetch failed :upside_down:")
         else:
             embed = discord.Embed(
