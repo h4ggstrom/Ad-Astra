@@ -1,12 +1,3 @@
-"""
-TODO: supprimer ce commentaire une fois qu'on aura fini le fichier
-
-Le fichier client.py va se charger de gérer les interactions avec l'API Discord. (#copilot)
-
-En gros, va pas y avoir grand chose à faire ici. Juste le client va se connecter à Discord, et renvoyer les commandes vers le main.py, pour qu'il les traites
-Je pense ca va partir sur un gros tuto ytb un de ces jours, et inchallah ca va bien se passer.
-
-"""
 import discord
 import config as cfg
 from discord import app_commands
@@ -144,27 +135,6 @@ async def coordinates(interaction: discord.Interaction, zip: int, country: str) 
         coord += f"{k}: {v}\n"
     await interaction.response.send_message(f"```json\n {coord}\n```")
     
-# TODO: ca, ca dégage une fois qu'on a fini d'implémenter l'affichage   
-@tree.command(name="embed", description="Envoie un message embed", guild=guild_id)
-async def embed(interaction: discord.Interaction) -> None:
-    embed = discord.Embed(
-        title="Prévisions Météo du Jour",
-        description="Voici les prévisions météo complètes.",
-        color=discord.Color.green(),
-        url="https://example.com"
-    )
-    
-    user = await client.fetch_user(interaction.user.id)
-    embed.set_author(name=user.name, icon_url=user.avatar.url)
-    embed.add_field(name="Ville", value="Paris", inline=False)
-    embed.add_field(name="Température", value="18°C", inline=True)
-    embed.add_field(name="Humidité", value="72%", inline=True)
-    embed.set_thumbnail(url="https://openweathermap.org/img/wn/10d@2x.png")
-    embed.set_image(url="https://example.com/weather-map.png")
-    embed.set_footer(text="Dernière mise à jour : 12h00", icon_url="https://example.com/logo.png")
-    embed.timestamp = discord.utils.utcnow()
-    
-    await interaction.response.send_message(embed=embed)
     
 @tree.command(name="forecast", description="display a 12h hour forecast for a specific location", guild=guild_id)
 async def forecast(interaction: discord.Interaction, name: str) -> None:
@@ -176,7 +146,6 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
         rq.fetchWeatherData(loc['latitude'], loc['longitude'], "forecast")
         wd = rq.forecastFetch(f"data/{loc['latitude']}_{loc['longitude']}_forecast.json")
         if len(wd) == 0:
-            print("zbilizbouet")
             await interaction.response.send_message("fetch failed :upside_down:")
         else:
             embed = discord.Embed(
@@ -227,7 +196,7 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
                 # wind rating
                 if hour_data['wind_speed'] < 2.78:
                     wind = ":green_square: "
-                elif 2.78 <= hour_data['wind_speed'] < 6.94:
+                elif hour_data['wind_speed'] < 6.94:
                     wind = ":orange_square: "
                     badness += 0.5
                 else:
@@ -252,16 +221,16 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
                 else:
                     rating = "__***RATING: ***__:red_square:"
 
-                # Ajout de chaque champ pour chaque heure
+                # Adding fields to the embed
                 embed.add_field(name=hour, value=f"{rating}\n**{weather}**\n{cloudiness}\n{temperature}\n{humidity}\n{wind}\n{pop}", inline=True)
-                # Get the last modified time of the JSON file
+               
+            # Get the last modified time of the JSON file
+            file_path = f"data/{loc['latitude']}_{loc['longitude']}_forecast.json"
+            last_modified_time = os.path.getmtime(file_path)
+            last_modified_date = datetime.fromtimestamp(last_modified_time).strftime('%d/%m/%Y %H:%M:%S')
 
-                file_path = f"data/{loc['latitude']}_{loc['longitude']}_forecast.json"
-                last_modified_time = os.path.getmtime(file_path)
-                last_modified_date = datetime.fromtimestamp(last_modified_time).strftime('%d/%m/%Y %H:%M:%S')
-
-                # Add footer with the last modified date
-                embed.set_footer(text=f"Dernière mise à jour : {last_modified_date}")
+            # Add footer with the last modified date
+            embed.set_footer(text=f"Dernière mise à jour : {last_modified_date}")
             await interaction.response.send_message(embed=embed)
 
 # tbh this try/catch section is useless considering the token doesn't expire (and works), but let's call that *code quality* :upside_down:
