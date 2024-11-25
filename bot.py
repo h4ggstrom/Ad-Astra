@@ -127,6 +127,15 @@ async def current_weather(interaction: discord.Interaction) -> None:
 
 @tree.command(name="coordinates", description="get the coordinates of a location", guild=guild_id)
 async def coordinates(interaction: discord.Interaction, zip: int, country: str) -> None:
+    """return the coordinates of a location
+
+    Args:
+        interaction (discord.Interaction): interaction object
+        zip (int): zip code of the location
+        country (str): country of the location
+    """
+    coordinates: dict
+    
     coordinates = rq.getCoordinates(zip, country)
     if coordinates == None:
         await interaction.response.send_message("fetch failed :upside_down:")
@@ -138,6 +147,30 @@ async def coordinates(interaction: discord.Interaction, zip: int, country: str) 
     
 @tree.command(name="forecast", description="display a 12h hour forecast for a specific location", guild=guild_id)
 async def forecast(interaction: discord.Interaction, name: str) -> None:
+    """display a 12h hour forecast for a specific location
+
+    Args:
+        interaction (discord.Interaction): interaction object
+        name (str): name of the location (see /list_locations for the list)
+    """
+    
+    # internal variables
+    loc: dict
+    wd: list
+    embed: discord.Embed
+    badness: float
+    hour: str
+    weather: str
+    cloudiness: str
+    temperature: str
+    humidity: str
+    wind: str
+    pop: str
+    rating: str
+    file_path: str
+    last_modified_time: float
+    last_modified_date: str
+    
     loc = cm.getLocation(name)
     
     if loc is None:
@@ -158,7 +191,8 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
                 # Formatage de l'heure et des données
                 badness = 0
                 hour = hour_data['dt'] + ":00"
-                weather = hour_data['weather'].capitalize()
+                weather = hour_data['weather']
+                # weather = f"**{weather['description']}**"
                 
                 # cloudiness rating
                 if hour_data['cloudiness'] < 20:
