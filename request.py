@@ -54,6 +54,7 @@ def fetchWeatherData(lat: float, lon: float, mode: str) -> None:
         
     # Make the API request
     request_url = base_url + f"lat={lat}&lon={lon}&appid=" + cfg.WEATHER_TOKEN + "&cnt=12"
+    aaL.logger.debug(f"Request URL: {request_url}")
     response = requests.get(request_url)
     
     """
@@ -183,8 +184,9 @@ def getCoordinates(zip: int, country: str) -> dict:
     coordinates: dict
     
     rq_url = cfg.GEOLOC_URL
-    rq_url += f"zip?zip={zip},{country}"
+    rq_url += f"?zip={zip},{country}"
     rq_url += "&appid=" + cfg.WEATHER_TOKEN
+    aaL.logger.debug(f"Request URL: {rq_url}")
     coordinates = (requests.get(rq_url)).json()
     
     if coordinates == None:
