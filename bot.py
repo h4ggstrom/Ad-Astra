@@ -41,7 +41,6 @@ async def ping(interaction: discord.Interaction) -> None:
     """
     await interaction.response.send_message("https://tenor.com/view/bing-gif-25601964")
 
-# TODO: utiliser le code de la fonction coordinate pour simplifier les arguments
 @tree.command(name="add_location", description="add a location to the list", guild=guild_id)
 async def add_location(interaction: discord.Interaction, name: str, city: str, country: str, latitude: float, longitude: float) -> None:
     """slash command to add a location to the list
@@ -267,7 +266,7 @@ async def forecast(interaction: discord.Interaction, name: str) -> None:
             embed.set_footer(text=f"Dernière mise à jour : {last_modified_date}")
             await interaction.response.send_message(embed=embed)
 
-# tbh this try/catch section is useless considering the token doesn't expire (and works), but let's call that *code quality* :upside_down:
+# bot startup function
 def run():
     try:
         # Start the houseKeeper function in a separate daemon thread

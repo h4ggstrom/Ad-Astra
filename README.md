@@ -14,10 +14,6 @@ More specifically, it uses data collected from [OpenWeatherMap](https://openweat
 - customize the tolerance thresholds
 - and a lot more to come
 
-## __*__Useful links__*__
-
-- [API DOCUMENTATION](https://openweathermap.org/current)
-
 ## __*__Authors__*__
 
 - DE ANGELIS Robin, CYU Cergy-Paris University, <robin.de-angelis@etu.cyu.fr>

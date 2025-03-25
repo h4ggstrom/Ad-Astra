@@ -1,5 +1,5 @@
-""" 
-Ce fichier sert à centraliser le logger, pour éviter de devoir le réimporter et reconfigurer les paramètres dans chaque fichier.
+"""
+This file is used to configure the logger for the Ad-Astra project.
 """
 
 from loguru import logger
